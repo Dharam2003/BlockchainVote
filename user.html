@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cast Your Vote | SecureVote</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Shared Styles with Homepage */
+        :root {
+            --primary: #2c3e50;
+            --secondary: #3498db;
+            --accent: #e74c3c;
+            --light: #ecf0f1;
+            --dark: #1a252f;
+            --success: #27ae60;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f8f9fa;
+            color: var(--dark);
+            line-height: 1.6;
+        }
+        
+        /* Navigation - Same as Homepage */
+        .navbar {
+            background-color: var(--primary);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .logo {
+            color: white;
+            font-size: 1.8rem;
+            font-weight: 700;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+        }
+        
+        .logo i {
+            margin-right: 10px;
+            color: var(--secondary);
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+        }
+        
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+        }
+        
+        .nav-links a:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        .btn {
+            padding: 0.6rem 1.2rem;
+            border-radius: 4px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .btn-primary {
+            background-color: var(--secondary);
+            color: white;
+            border: 2px solid var(--secondary);
+        }
+        
+        /* Voting Specific Styles */
+        .voting-container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+        
+        .voting-header {
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .voting-header h2 {
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+        
+        .user-info {
+            background: white;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+        
+        .candidates-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .candidate-card {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            cursor: pointer;
+        }
+        
+        .candidate-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .candidate-card.selected {
+            border-color: var(--secondary);
+            background-color: #f0f8ff;
+        }
+        
+        .candidate-card input {
+            margin-right: 10px;
+        }
+        
+        .candidate-info h3 {
+            margin-bottom: 0.5rem;
+            color: var(--primary);
+        }
+        
+        .vote-btn {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            text-align: center;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .navbar {
+                flex-direction: column;
+                padding: 1rem;
+            }
+            
+            .nav-links {
+                margin-top: 1rem;
+                gap: 1rem;
+            }
+            
+            .voting-container {
+                margin: 1rem;
+            }
+            
+            .candidates-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <a href="index.html" class="logo">
+            <i class="fas fa-vote-yea"></i>
+            SecureVote
+        </a>
+        <div class="nav-links">
+            <a href="user.html"><i class="fas fa-vote-yea"></i> Vote</a>
+            <a href="results.html"><i class="fas fa-chart-bar"></i> Results</a>
+            <a href="#" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</a>
+        </div>
+    </nav>
+
+    <div class="voting-container">
+        <div class="voting-header">
+            <h2><i class="fas fa-vote-yea"></i> Cast Your Vote</h2>
+            <p>Select your preferred candidate and submit your vote</p>
+        </div>
+        
+        <div class="user-info">
+            <p>Logged in as: <strong id="usernameDisplay"></strong></p>
+            <p id="voteStatus"></p>
+        </div>
+        
+        <div class="candidates-grid" id="candidateList">
+            <!-- Filled by JavaScript -->
+        </div>
+        
+        <button onclick="castVote()" class="btn btn-primary vote-btn" id="voteButton">
+            <i class="fas fa-paper-plane"></i> Submit Vote
+        </button>
+    </div>
+
+    <script>
+        // Display user info
+        document.getElementById('usernameDisplay').textContent = 
+            localStorage.getItem('currentUser') || 'User';
+        
+        // Check if already voted
+        const currentUser = localStorage.getItem('currentUser');
+        const users = JSON.parse(localStorage.getItem('users')) || [];
+        const user = users.find(u => u.username === currentUser);
+        
+        if (user && user.voted) {
+            document.getElementById('voteStatus').innerHTML = 
+                '<span style="color: var(--accent);"><i class="fas fa-exclamation-circle"></i> You have already voted!</span>';
+            document.getElementById('voteButton').disabled = true;
+            document.getElementById('voteButton').innerHTML = 
+                '<i class="fas fa-check-circle"></i> Vote Submitted';
+            document.getElementById('voteButton').style.backgroundColor = '#28a745';
+        } else {
+            document.getElementById('voteStatus').innerHTML = 
+                '<span style="color: var(--success);"><i class="fas fa-info-circle"></i> You may cast your vote</span>';
+        }
+        
+        // Load candidates when page loads
+        document.addEventListener('DOMContentLoaded', loadCandidates);
+        
+        function loadCandidates() {
+            const candidates = JSON.parse(localStorage.getItem('candidates')) || [];
+            const container = document.getElementById('candidateList');
+            
+            container.innerHTML = candidates.length === 0
+                ? '<p style="grid-column: 1/-1; text-align: center;">No candidates available for voting</p>'
+                : candidates.map((candidate, index) => `
+                    <label class="candidate-card" id="candidate-${index}">
+                        <input type="radio" name="candidate" value="${candidate.name}" 
+                               onchange="selectCandidate(${index})">
+                        <div class="candidate-info">
+                            <h3>${candidate.name}</h3>
+                            <p>Current votes: ${candidate.votes}</p>
+                        </div>
+                    </label>
+                `).join('');
+        }
+        
+        function selectCandidate(index) {
+            // Remove selected class from all cards
+            document.querySelectorAll('.candidate-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            
+            // Add selected class to chosen card
+            document.getElementById(`candidate-${index}`).classList.add('selected');
+        }
+        
+        function castVote() {
+            const selected = document.querySelector('input[name="candidate"]:checked');
+            if (!selected) {
+                alert('Please select a candidate before voting!');
+                return;
+            }
+            
+            const username = localStorage.getItem('currentUser');
+            const users = JSON.parse(localStorage.getItem('users')) || [];
+            const candidates = JSON.parse(localStorage.getItem('candidates')) || [];
+            
+            // Find user and check if already voted
+            const userIndex = users.findIndex(u => u.username === username);
+            if (userIndex === -1 || users[userIndex].voted) {
+                alert('You have already voted or your account is invalid!');
+                return;
+            }
+            
+            // Update candidate votes
+            const candidateIndex = candidates.findIndex(c => c.name === selected.value);
+            if (candidateIndex !== -1) {
+                candidates[candidateIndex].votes++;
+                
+                // Mark user as voted
+                users[userIndex].voted = true;
+                
+                // Save changes
+                localStorage.setItem('candidates', JSON.stringify(candidates));
+                localStorage.setItem('users', JSON.stringify(users));
+                
+                alert('Your vote has been successfully cast!');
+                window.location.href = 'results.html';
+            }
+        }
+        
+        function logout() {
+            localStorage.removeItem('currentUser');
+            localStorage.removeItem('currentRole');
+            window.location.href = 'index.html';
+        }
+    </script>
+</body>
+</html>
